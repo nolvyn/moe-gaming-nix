@@ -23,7 +23,9 @@ jobs:
 
       - name: Run nix-update
         run: |
-          nix run nixpkgs#nix-update -- --flake dw-proton-bin
+          nix run nixpkgs#nix-update -- --flake dw-proton-bin \
+            --version-regex 'dwproton-(.+)' \
+            --version-type stable
 
       - name: Create PR if changed
         uses: peter-evans/create-pull-request@v8
