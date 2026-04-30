@@ -51,7 +51,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       bsd3
       unfree
     ];
-    maintainers = with lib.maintainers; [ nolvyn ];
+    maintainers = with lib.maintainers; [ ];
     platforms = [ "x86_64-linux" ];
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
