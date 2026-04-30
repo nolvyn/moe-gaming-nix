@@ -21,11 +21,19 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@v13
 
+      - name: Get latest stable version
+        id: get-version
+        run: |
+          VERSION=$(curl -s "https://dawn.wine/api/v1/repos/dawn-winery/dwproton/releases?limit=10&pre-release=false" \
+            | jq -r '[.[] | select(.prerelease == false)] | first | .tag_name' \
+            | sed 's/^dwproton-//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Run nix-update
         run: |
           nix run nixpkgs#nix-update -- --flake dw-proton-bin \
             --version-regex 'dwproton-(.+)' \
-            --version-type stable
+            --version ${{ steps.get-version.outputs.version }}
 
       - name: Create PR if changed
         uses: peter-evans/create-pull-request@v8
