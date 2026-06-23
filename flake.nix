@@ -18,10 +18,12 @@
     {
       overlays.default = final: prev: {
         dw-proton-bin = prev.callPackage ./pkgs/dw-proton-bin/package.nix { };
+        proton-cachyos-bin = prev.callPackage ./pkgs/proton-cachyos-bin/package.nix { };
       };
 
       packages.${system} = {
         dw-proton-bin = pkgs.dw-proton-bin;
+        proton-cachyos-bin = pkgs.proton-cachyos-bin;
         default = pkgs.dw-proton-bin;
       };
 

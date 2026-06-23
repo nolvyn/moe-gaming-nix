@@ -1,0 +1,50 @@
+name: Update proton-cachyos-bin
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Get latest stable version
+        id: get-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/CachyOS/proton-cachyos/releases/latest" \
+            | jq -r '.tag_name' \
+            | sed 's/^cachyos-//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Run nix-update
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+        run: |
+          nix run nixpkgs#nix-update -- --flake proton-cachyos-bin \
+            --version-regex 'cachyos-(.+)' \
+            --version "$VERSION"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pkgs/proton-cachyos-bin/package.nix
+          if ! git diff --staged --quiet; then
+            git commit -m "proton-cachyos-bin: update to latest"
+            git push
+          fi
